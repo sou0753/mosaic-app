@@ -1,34 +1,75 @@
 <!doctype html>
 <html lang="ja">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#111111">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="モザイク">
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon-180.png">
-<link rel="stylesheet" href="style.css">
-<title>モザイク</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0c1220">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="モザイク">
+  <meta name="description" content="写真を端末内で加工。モザイク、ぼかし、モヤを指先で。">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./icon-180.png">
+  <link rel="stylesheet" href="./style.css">
+  <title>モザイク | Photo privacy studio</title>
 </head>
 <body>
-<main class="app">
-<h1>モザイク</h1>
-<p class="privacy">画像は端末内で処理され、外部へ送信しません。</p>
-<label class="button primary">写真を選ぶ
-<input id="fileInput" type="file" accept="image/*" hidden>
-</label>
-<section id="editor" class="hidden">
-<div class="canvas-wrap"><canvas id="canvas"></canvas></div>
-<label>ブラシサイズ<input id="brushSize" type="range" min="10" max="120" value="40"></label>
-<label>モザイクの粗さ<input id="pixelSize" type="range" min="6" max="60" value="20"></label>
-<div class="actions">
-<button id="undoBtn" class="button">戻す</button>
-<button id="clearBtn" class="button">全消去</button>
-<button id="saveBtn" class="button primary">画像を保存</button>
-</div>
-</section>
-</main>
-<script src="app.js"></script>
+  <main class="app">
+    <header class="header">
+      <div class="brand"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><div><h1>モザイク<span class="brand-dot">.</span></h1><p>PHOTO PRIVACY STUDIO</p></div></div>
+      <span id="offlineStatus" class="status">準備中</span>
+    </header>
+    <div id="updateNotice" class="notice" hidden>新しいバージョンがあります。画像を保存してから<button id="updateBtn" type="button">更新する</button></div>
+    <div class="top-actions"><button id="openBtn" class="button secondary" type="button"><span aria-hidden="true">＋</span> 写真を選ぶ</button><button id="saveBtn" class="button primary" type="button" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M5 16v4h14v-4"/></svg>画像を保存</button></div>
+    <input id="fileInput" type="file" accept="image/*" hidden>
+
+    <section class="workspace" aria-label="画像編集">
+      <div class="stage-top"><span id="imageInfo">あなただけの、写真編集。</span><button id="fitBtn" type="button" disabled aria-label="画像全体を表示"><span id="zoomLabel">100%</span> <span aria-hidden="true">⤢</span></button></div>
+      <div id="stage" class="stage">
+        <canvas id="viewCanvas" aria-label="写真の編集領域。1本指で加工、2本指で拡大縮小と移動。"></canvas>
+        <div id="welcome" class="welcome">
+          <div class="sample-art" aria-hidden="true"><div class="sample-sun"></div><div class="sample-hill hill-back"></div><div class="sample-hill hill-front"></div><div class="sample-mosaic"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span class="sample-spark">✦</span></div>
+          <h2>見せたいところだけ、残す。</h2><p>写真を選んで、隠したいところをなぞる。<br>やさしいぼかしも、指先ひとつで。</p>
+          <span class="privacy"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 7 3v6c0 4-7 9-7 9S5 16 5 12V6l7-3Z"/><path d="m8 12 3 3 5-6"/></svg>写真は外部に送信しません</span>
+        </div>
+        <span id="compareBadge" class="compare-badge" hidden>加工前</span>
+      </div>
+      <p id="gestureHint" class="gesture-hint">1本指で加工 · 2本指で拡大・移動</p>
+    </section>
+
+    <section class="controls" aria-label="加工設定">
+      <div class="section-heading"><h2>エフェクト</h2><span id="effectCaption">くっきり、しっかり隠す</span></div>
+      <div class="effects" role="group" aria-label="加工の種類">
+        <button type="button" class="effect selected" data-effect="pixelate" aria-pressed="true"><span class="effect-swatch swatch-pixel" aria-hidden="true"></span>モザイク</button>
+        <button type="button" class="effect" data-effect="blur" aria-pressed="false"><span class="effect-swatch swatch-blur" aria-hidden="true"></span>ぼかし</button>
+        <button type="button" class="effect" data-effect="mist" aria-pressed="false"><span class="effect-swatch swatch-mist" aria-hidden="true"></span>モヤ</button>
+        <button type="button" class="effect" data-effect="black" aria-pressed="false"><span class="effect-swatch swatch-black" aria-hidden="true"></span>黒塗り</button>
+      </div>
+      <div class="tools" role="group" aria-label="範囲の選び方">
+        <button type="button" data-tool="brush" class="selected" aria-pressed="true"><span aria-hidden="true">◉</span> なぞる</button><button type="button" data-tool="rect" aria-pressed="false"><span aria-hidden="true">▧</span> 四角で選ぶ</button><button type="button" data-tool="pan" aria-pressed="false"><span aria-hidden="true">✥</span> 移動</button>
+      </div>
+      <div class="sliders">
+        <label>太さ <output id="brushValue" for="brushSize">36</output><input id="brushSize" type="range" min="10" max="120" value="36" aria-label="ブラシの太さ"></label>
+        <label>強さ <output id="strengthValue" for="strengthRange">55</output><input id="strengthRange" type="range" min="10" max="100" value="55" aria-label="加工の強さ"></label>
+      </div>
+      <div class="history-tools">
+        <button id="undoBtn" type="button" disabled><span aria-hidden="true">↶</span>戻す</button><button id="redoBtn" type="button" disabled><span aria-hidden="true">↷</span>やり直す</button><button id="compareBtn" type="button" aria-pressed="false" disabled><span aria-hidden="true">◧</span>加工前</button><button id="resetBtn" type="button" disabled><span aria-hidden="true">↺</span>リセット</button>
+      </div>
+    </section>
+    <footer><span>PRIVATE BY DESIGN</span><span>v3.0 · 端末内で処理</span></footer>
+  </main>
+
+  <dialog id="saveDialog" aria-labelledby="saveTitle">
+    <div class="dialog-heading"><div><p class="eyebrow">READY TO SAVE</p><h2 id="saveTitle">仕上がりを保存</h2></div><button id="closeSaveBtn" class="close-button" type="button" aria-label="保存画面を閉じる">×</button></div>
+    <div class="export-preview"><img id="exportPreview" alt="保存する加工済み画像"></div>
+    <label class="format-label">保存形式<select id="formatSelect"><option value="image/jpeg">JPEG · 写真向け</option><option value="image/png">PNG · 透過を保持</option></select></label>
+    <p id="exportInfo" class="dialog-note" aria-live="polite">画像を準備しています…</p>
+    <button id="shareBtn" class="button primary full" type="button" disabled>共有メニューを開く</button>
+    <a id="downloadLink" class="download-link" download>ファイルとしてダウンロード</a>
+    <p id="saveHelp" class="dialog-note">iPhoneでは共有メニューの「画像を保存」で写真アプリに保存できます。</p>
+  </dialog>
+  <dialog id="confirmDialog" aria-labelledby="confirmTitle"><h2 id="confirmTitle"></h2><p id="confirmText" class="dialog-note"></p><div class="confirm-actions"><button id="cancelConfirmBtn" class="button secondary" type="button">キャンセル</button><button id="acceptConfirmBtn" class="button primary" type="button">続ける</button></div></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <script src="./app.js" defer></script>
 </body>
 </html>

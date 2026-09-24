@@ -1,1 +1,16 @@
-{"name":"モザイク","short_name":"モザイク","start_url":"./","display":"standalone","background_color":"#ffffff","theme_color":"#111111","icons":[{"src":"icon-192.png","sizes":"192x192","type":"image/png"},{"src":"icon-512.png","sizes":"512x512","type":"image/png"}]}
+{
+  "id": "./",
+  "name": "モザイク — Photo Privacy Studio",
+  "short_name": "モザイク",
+  "lang": "ja",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0c1220",
+  "theme_color": "#0c1220",
+  "description": "モザイク、ぼかし、モヤ。写真を端末内だけで編集できます。",
+  "icons": [
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
